@@ -1,6 +1,7 @@
+/* eslint-disable no-undef */
+const handlers = require('./lib/handlers');
 const express = require('express');
 const expressHandlebars = require('express-handlebars');
-const fortune = require('./lib/fortune');
 
 const app = express();
 
@@ -13,33 +14,23 @@ app.set('view engine', 'handlebars');
 
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.render(__dirname + '/views/layouts/' + 'home');
-});
+app.get('/', handlers.home);
 
-app.get('/about', (req, res) => {
-  res.render(__dirname + '/views/layouts/' + 'about', {fortune: fortune.getFortune()});
-});
+app.get('/about', handlers.about);
 
 app.use(express.static(__dirname + '/public'));
 
 // página 404 personalizada
 
-app.use((req, res) => {
-  res.status(404);
-  res.render(__dirname + '/views/layouts/' + '404');
-});
+app.use(handlers.notFound);
 
 // página 500 personalizada
 
-app.use((err, req, res, next) => {
-  console.log(err.message);
-  res.status(500);
-  res.render(__dirname + '/views/layouts/' + '500');
-});
+app.use(handlers.serverError);
 
-app.listen(port, () => console.log(
-  `Express started on http://localhost:${port};`
-  + ` Press Ctrl-C to terminate.`
-));
-
+if(require.main === module) {
+  app.listen(port, () => console.log(
+    `Express started on http://localhost:${port}; Press Ctrl-C to terminate.`));
+}else{
+  module.exports = app;
+}
